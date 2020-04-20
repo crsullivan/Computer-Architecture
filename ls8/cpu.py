@@ -31,7 +31,7 @@ class CPU:
         ]
 
         for instruction in program:
-            self.ram[address] = instruction
+            self.ram_write(address, instruction)
             address += 1
 
         print("UPDATED RAM:", self.ram)
@@ -44,6 +44,12 @@ class CPU:
         #elif op == "SUB": etc
         else:
             raise Exception("Unsupported ALU operation")
+    
+    def ram_read(self, location):
+        return self.ram[location]
+
+    def ram_write(self, location, value):
+        self.ram[location] = value
 
     def trace(self):
         """
@@ -65,6 +71,7 @@ class CPU:
 
         print()
 
+
     def run(self):
         """Run the CPU."""
         LDI = 0b10000010
@@ -73,11 +80,11 @@ class CPU:
         running = True
         reg_tracker = 0
         while running == True:
-            inst = self.ram[self.pc]
+            inst = self.ram_read(self.pc)
             if inst == LDI:
-                self.reg[self.pc] = self.ram[self.pc+1]
+                self.reg[self.pc] = self.ram_read(self.pc+1)
                 self.pc += 1
-                self.reg[self.pc] = self.ram[self.pc+1]
+                self.reg[self.pc] = self.ram_read(self.pc+1)
                 self.pc += 2
                 reg_tracker += 1
             elif inst == PRN:
