@@ -19,7 +19,6 @@ class CPU:
         address = 0
         with open('./examples/'+program_filename) as f:
             for line in f:
-                print(line)
                 line = line.split('#')
                 line = line[0].strip()
 
@@ -94,18 +93,21 @@ class CPU:
         MUL = 0b10100010
         running = True
         reg_tracker = 0
+        
         while running == True:
+            operand_a = self.ram_read(self.pc+1)
+            operand_b = self.ram_read(self.pc+2)
             inst = self.ram_read(self.pc)
             if inst == LDI:
-                self.reg[self.ram_read(self.pc+1)] = self.ram_read(self.pc+2)
+                self.reg[operand_a] = operand_b
                 reg_tracker += 1
                 self.pc += 3
                 print("UPDATED REGISTER:", self.reg)
             elif inst == MUL:
-                print("MULT:", self.reg[0] * self.reg[1])
+                print("MULT:", self.reg[operand_a] * self.reg[operand_b])
                 self.pc += 3
             elif inst == PRN:
-                print("REG 0:", self.reg[0])
+                print("REG 0:", self.reg[operand_a])
                 self.pc += 2
             elif inst == HLT:
                 running = False
