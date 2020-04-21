@@ -15,24 +15,37 @@ class CPU:
 
     def load(self):
         """Load a program into memory."""
-
+        program_filename = sys.argv[1]
         address = 0
+        with open('./examples/'+program_filename) as f:
+            for line in f:
+                print(line)
+                line = line.split('#')
+                line = line[0].strip()
+
+                if line == '':
+                    continue
+
+                self.ram[address] = int(line, 2)
+
+                address += 1
+        # address = 0
 
         # For now, we've just hardcoded a program:
 
-        program = [
-            # From print8.ls8
-            0b10000010, # LDI R0,8
-            0b00000000,
-            0b00001000,
-            0b01000111, # PRN R0
-            0b00000000,
-            0b00000001, # HLT
-        ]
+        # program = [
+        #     # From print8.ls8
+        #     0b10000010, # LDI R0,8
+        #     0b00000000,
+        #     0b00001000,
+        #     0b01000111, # PRN R0
+        #     0b00000000,
+        #     0b00000001, # HLT
+        # ]
 
-        for instruction in program:
-            self.ram_write(address, instruction)
-            address += 1
+        # for instruction in program_filename:
+        #     self.ram_write(address, instruction)
+        #     address += 1
 
         print("UPDATED RAM:", self.ram)
 
@@ -73,27 +86,30 @@ class CPU:
 
 
     def run(self):
+      
         """Run the CPU."""
         LDI = 0b10000010
         PRN = 0b01000111
         HLT = 0b00000001
+        MUL = 0b10100010
         running = True
         reg_tracker = 0
         while running == True:
             inst = self.ram_read(self.pc)
             if inst == LDI:
-                self.reg[self.pc] = self.ram_read(self.pc+1)
-                self.pc += 1
-                self.reg[self.pc] = self.ram_read(self.pc+1)
-                self.pc += 2
+                self.reg[self.ram_read(self.pc+1)] = self.ram_read(self.pc+2)
                 reg_tracker += 1
-            elif inst == PRN:
+                self.pc += 3
                 print("UPDATED REGISTER:", self.reg)
-                print("PRINT LS8:", self.reg[reg_tracker])
+            elif inst == MUL:
+                print("MULT:", self.reg[0] * self.reg[1])
+                self.pc += 3
+            elif inst == PRN:
+                print("REG 0:", self.reg[0])
                 self.pc += 2
             elif inst == HLT:
                 running = False
             else:
-                print("Unknown instruction")
-
+                print("Unknown instruction:", inst, self.pc)
+                
                 running = False
