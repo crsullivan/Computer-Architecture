@@ -54,17 +54,17 @@ while running:
 # /////////////////////////////////////////////////////////////////////////////
 
 import sys
-​
+
 # Write a program in Python that runs programs
-​
+
 # Parse the command line
 program_filename = sys.argv[1]
-​
+
 PRINT_BEEJ = 1
 HALT = 2
 SAVE_REG = 3   # Store a value in a register (in the LS8 called LDI)
 PRINT_REG = 4  # corresponds to PRN in the LS8
-​
+
 """
 memory = [
 	PRINT_BEEJ,
