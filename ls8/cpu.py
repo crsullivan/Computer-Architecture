@@ -10,6 +10,7 @@ class CPU:
         self.ram = [0] * 256
         self.pc = 0
         self.reg = [0] * 8
+        self.sp = 7
         print("RAM:", self.ram)
         print ("REGISTER:", self.reg)
 
@@ -91,6 +92,8 @@ class CPU:
         PRN = 0b01000111
         HLT = 0b00000001
         MUL = 0b10100010
+        PUSH = 0b01000101
+        POP = 0b01000110
         running = True
         reg_tracker = 0
         
@@ -107,11 +110,33 @@ class CPU:
                 print("MULT:", self.reg[operand_a] * self.reg[operand_b])
                 self.pc += 3
             elif inst == PRN:
-                print("REG 0:", self.reg[operand_a])
+                print("PRN:", self.reg[operand_a])
+                self.pc += 2
+            elif inst == PUSH:
+                print('PUSH')
+                # decrement the stack pointer
+                self.reg[self.sp] -= 1   # address_of_the_top_of_stack -= 1
+
+                # copy value from register into memory
+                reg_num = self.ram[self.pc + 1]
+                value = self.reg[reg_num]  # this is what we want to push
+                print("VALUE:", value, "AT LOCATION:", reg_num)
+                address = self.reg[self.sp]
+                print('TO RAM ADDRESS:', address)
+                self.ram[address] = value   # store the value on the stack
+                print("UPDATED RAM:", self.ram)
+                self.pc += 2
+            elif inst == POP: 
+                address = self.reg[self.sp]
+                print('POP')
+                value = self.ram[address]
+                reg_num = self.ram[self.pc + 1]
+                self.reg[reg_num] = value
+                print("UPDATED REGISTER:", self.reg)
+                self.reg[self.sp] += 1 
                 self.pc += 2
             elif inst == HLT:
                 running = False
             else:
-                print("Unknown instruction:", inst, self.pc)
-                
+                print("Unknown instruction:", inst, 'at location', self.pc)
                 running = False
