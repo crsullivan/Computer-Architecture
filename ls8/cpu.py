@@ -88,12 +88,17 @@ class CPU:
     def run(self):
       
         """Run the CPU."""
+
         LDI = 0b10000010
         PRN = 0b01000111
         HLT = 0b00000001
         MUL = 0b10100010
         PUSH = 0b01000101
         POP = 0b01000110
+        CALL = 0b01010000
+        RET = 0b00010001
+        ADD = 0b10100000
+
         running = True
         reg_tracker = 0
         
@@ -135,6 +140,31 @@ class CPU:
                 print("UPDATED REGISTER:", self.reg)
                 self.reg[self.sp] += 1 
                 self.pc += 2
+            elif inst == CALL:
+                # compute return address
+                return_addr = self.pc + 2
+
+                # push on the stack
+                self.reg[self.sp] -= 1
+                self.ram[self.reg[self.sp]] = return_addr
+
+                # Set the self.pc to the value in the given register
+                reg_num = self.ram[self.pc + 1]
+                dest_addr = self.reg[reg_num]
+
+                self.pc = dest_addr
+            elif inst == ADD:
+                self.reg[operand_a] = self.reg[operand_a] + self.reg[operand_b]
+                print("UPDATED REGISTER:", self.reg)
+                self.pc += 3
+
+            elif inst == RET:
+                # pop return address from top of stack
+                return_addr = self.ram[self.reg[self.sp]]
+                self.reg[self.sp] += 1
+
+                # Set the pc
+                self.pc = return_addr
             elif inst == HLT:
                 running = False
             else:
