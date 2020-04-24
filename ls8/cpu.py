@@ -11,6 +11,7 @@ class CPU:
         self.pc = 0
         self.reg = [0] * 8
         self.sp = 7
+        self.flg = 1
         print("RAM:", self.ram)
         print ("REGISTER:", self.reg)
 
@@ -98,6 +99,11 @@ class CPU:
         CALL = 0b01010000
         RET = 0b00010001
         ADD = 0b10100000
+        # Sprint
+        CMP = 0b10100111
+        JEQ = 0b01010101
+        JNE = 0b01010110
+        JMP = 0b01010100
 
         running = True
         reg_tracker = 0
@@ -165,6 +171,35 @@ class CPU:
 
                 # Set the pc
                 self.pc = return_addr
+            elif inst == CMP:
+                if self.reg[operand_a] == self.reg[operand_b]:
+                    self.flg = 1    
+                if self.reg[operand_a] < self.reg[operand_b]:
+                    self.flg = 0 
+                if self.reg[operand_a] > self.reg[operand_b]:
+                    self.flg = 2 
+                self.pc += 3
+                print('CMP', self.flg)
+            elif inst == JMP:
+                print('JMP from', self.pc, 'TO', self.reg[operand_a])
+                return_addr = self.reg[operand_a]
+                self.pc = return_addr
+            elif inst == JEQ:
+                return_addr = self.reg[operand_a]
+                if self.flg == 1:
+                    self.pc = return_addr
+                    print("CONDITIONAL JUMP from", self.pc, 'TO', return_addr)
+                else:
+                    self.pc += 2
+                    print("JEQ conditions not met")
+            elif inst == JNE:
+                return_addr = self.reg[operand_a]
+                if not self.flg == 1:
+                    self.pc = return_addr
+                    print("CONDITIONAL JUMP from", self.pc, 'TO', return_addr)
+                else:
+                    self.pc += 2
+                    print("JNE conditions not met")
             elif inst == HLT:
                 running = False
             else:
