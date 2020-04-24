@@ -1,6 +1,8 @@
 """CPU functionality."""
-
+import time, threading
 import sys
+from time import sleep
+from threading import Timer
 
 class CPU:
     """Main CPU class."""
@@ -86,6 +88,41 @@ class CPU:
         print()
 
 
+# I started an out of spec implementation of timer interrupts, it runs and is kind of 
+# funny but does not utilize cpu instructions explicitly
+
+
+    def pause(self):
+        print('\nThinking')
+        time.sleep(2)
+        print('\n...8')
+        time.sleep(2)
+        print('\n...bit')
+        time.sleep(2)
+        print('\n...brain')
+        time.sleep(2)
+        print('\n...hurts')
+        time.sleep(8)
+        print('\n...ow')
+        time.sleep(5)
+        print('\n...make it stop')
+        time.sleep(5)
+        print('\n...Im doing my best')
+        time.sleep(5)
+        print('\n...Core 0 Maximum Thermal Threshold Reached')
+        time.sleep(5)
+        print('\n...WARNING')
+        time.sleep(5)
+        print('\n...OW')
+        time.sleep(5)
+        print('\n...OW')
+        time.sleep(5)
+        print('\n...HELP')
+        time.sleep(5)
+        print('\n...PLEASE')
+
+
+    
     def run(self):
       
         """Run the CPU."""
@@ -104,25 +141,38 @@ class CPU:
         JEQ = 0b01010101
         JNE = 0b01010110
         JMP = 0b01010100
+        # stretch interrupts (unfinished)
+        ST = 0b10000100
+        IRET = 0b00010011
+        PRA = 0b01001000
 
         running = True
         reg_tracker = 0
+        input("\nPress Enter to run " + sys.argv[1])
+        # t = Timer(2, self.pause)
+        # t.start()
+        # sleep(15)
         
         while running == True:
             operand_a = self.ram_read(self.pc+1)
             operand_b = self.ram_read(self.pc+2)
             inst = self.ram_read(self.pc)
             if inst == LDI:
+                # print(time.ctime())
+                # threading.Timer(2, self.pause()).start()
                 self.reg[operand_a] = operand_b
                 reg_tracker += 1
                 self.pc += 3
                 print("UPDATED REGISTER:", self.reg)
+                # time.sleep(2)
             elif inst == MUL:
                 print("MULT:", self.reg[operand_a] * self.reg[operand_b])
                 self.pc += 3
+                # time.sleep(2)
             elif inst == PRN:
-                print("PRN:", self.reg[operand_a])
+                print("PRN:", self.reg[operand_a], "<---------------------------------------------------------------------------------")
                 self.pc += 2
+                # time.sleep(2)
             elif inst == PUSH:
                 print('PUSH')
                 # decrement the stack pointer
@@ -137,6 +187,7 @@ class CPU:
                 self.ram[address] = value   # store the value on the stack
                 print("UPDATED RAM:", self.ram)
                 self.pc += 2
+                # time.sleep(2)
             elif inst == POP: 
                 address = self.reg[self.sp]
                 print('POP')
@@ -146,6 +197,7 @@ class CPU:
                 print("UPDATED REGISTER:", self.reg)
                 self.reg[self.sp] += 1 
                 self.pc += 2
+                # time.sleep(2)
             elif inst == CALL:
                 # compute return address
                 return_addr = self.pc + 2
@@ -159,11 +211,12 @@ class CPU:
                 dest_addr = self.reg[reg_num]
 
                 self.pc = dest_addr
+                # time.sleep(2)
             elif inst == ADD:
                 self.reg[operand_a] = self.reg[operand_a] + self.reg[operand_b]
                 print("UPDATED REGISTER:", self.reg)
                 self.pc += 3
-
+                # time.sleep(2)
             elif inst == RET:
                 # pop return address from top of stack
                 return_addr = self.ram[self.reg[self.sp]]
@@ -171,6 +224,7 @@ class CPU:
 
                 # Set the pc
                 self.pc = return_addr
+                # time.sleep(2)
             elif inst == CMP:
                 if self.reg[operand_a] == self.reg[operand_b]:
                     self.flg = 1    
@@ -179,29 +233,47 @@ class CPU:
                 if self.reg[operand_a] > self.reg[operand_b]:
                     self.flg = 2 
                 self.pc += 3
-                print('CMP', self.flg)
+                # time.sleep(2)
             elif inst == JMP:
                 print('JMP from', self.pc, 'TO', self.reg[operand_a])
                 return_addr = self.reg[operand_a]
                 self.pc = return_addr
+                # time.sleep(2)
             elif inst == JEQ:
                 return_addr = self.reg[operand_a]
                 if self.flg == 1:
                     self.pc = return_addr
                     print("CONDITIONAL JUMP from", self.pc, 'TO', return_addr)
+                    # time.sleep(2)
                 else:
                     self.pc += 2
                     print("JEQ conditions not met")
+                    # time.sleep(2)
             elif inst == JNE:
                 return_addr = self.reg[operand_a]
                 if not self.flg == 1:
                     self.pc = return_addr
                     print("CONDITIONAL JUMP from", self.pc, 'TO', return_addr)
+                    # time.sleep(2)
                 else:
                     self.pc += 2
                     print("JNE conditions not met")
+                    # time.sleep(2)
+            elif inst == PRA:
+                print(ascii(self.reg[operand_a]))
+                self.pc += 2
+            elif inst == IRET:
+                print('IRET')
+                break
+            elif inst == ST:
+                print('ST', self.reg)
+                self.reg[operand_a] = self.reg[operand_b]
+                print("ST UPDATED REGISTER:", self.reg)
+                self.pc += 3
             elif inst == HLT:
                 running = False
             else:
                 print("Unknown instruction:", inst, 'at location', self.pc)
                 running = False
+
+        # t.cancel()
